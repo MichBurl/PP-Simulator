@@ -1,6 +1,8 @@
 ﻿namespace Simulator;
 
-public class Creature
+using System;
+
+public abstract class Creature
 {
     private string _name = "Unknown";
     private int _level = 1;
@@ -10,29 +12,12 @@ public class Creature
         get => _name;
         set
         {
-            if (_name != "Unknown")
-            {
-                throw new InvalidOperationException("Name can only be set once.");
-            }
-
-            value = value.Trim();
-            if (value.Length < 3)
-            {
-                value = value.PadRight(3, '#');
-            }
-
-            value = value.Length > 25 ? value.Substring(0, 25).TrimEnd() : value;
-            if (value.Length < 3)
-            {
-                value = value.PadRight(3, '#');
-            }
-
-            if (char.IsLower(value[0]))
-            {
-                value = char.ToUpper(value[0]) + value.Substring(1);
-            }
-
-            _name = value;
+            if (_name != "Unknown") return;
+            var trimmed = value.Trim();
+            if (trimmed.Length < 3) trimmed = trimmed.PadRight(3, '#');
+            if (trimmed.Length > 25) trimmed = trimmed.Substring(0, 25).TrimEnd();
+            if (trimmed.Length < 3) trimmed = trimmed.PadRight(3, '#');
+            _name = char.ToUpper(trimmed[0]) + trimmed.Substring(1);
         }
     }
 
@@ -41,52 +26,96 @@ public class Creature
         get => _level;
         set
         {
-            if (_level != 1 && value != _level)
-            {
-                throw new InvalidOperationException("Level can only be set once.");
-            }
-
+            if (_level != 1) return;
             _level = Math.Clamp(value, 1, 10);
         }
     }
 
-    public Creature(string name, int level = 1)
+    protected Creature(string name, int level = 1)
     {
         Name = name;
-        Level = Math.Clamp(level, 1, 10);
+        Level = level;
     }
 
-    public Creature()
+    protected Creature()
     {
     }
 
-    public string Info => $"Name: {Name}, Level: {Level}";
+    public abstract void SayHi();
 
-    public void SayHi()
+    public abstract int Power { get; }
+}
+
+public class Elf : Creature
+{
+    private int _agility;
+    private int _singCount;
+
+    public int Agility
     {
-        Console.WriteLine($"Hi! I am {Name}, level {Level} creature.");
+        get => _agility;
+        private set => _agility = Math.Clamp(value, 0, 10);
     }
 
-    public void Upgrade()
+    public Elf(string name, int level = 1, int agility = 0) : base(name, level)
     {
-        if (Level < 10)
+        Agility = agility;
+    }
+
+    public Elf()
+    {
+    }
+
+    public override void SayHi()
+    {
+        Console.WriteLine($"I'm {Name}, an Elf at Level {Level} with {Agility} agility.");
+    }
+
+    public void Sing()
+    {
+        _singCount++;
+        if (_singCount % 3 == 0)
         {
-            _level++;
+            Agility++;
         }
     }
-    public void Go(Direction direction)
+
+    public override int Power => (Level * 8) + (Agility * 2);
+}
+
+public class Orc : Creature
+{
+    private int _rage;
+    private int _huntCount;
+
+    public int Rage
     {
-        string directionText = direction.ToString().ToLower();
-        Console.WriteLine($"{Name} goes {directionText}.");
+        get => _rage;
+        private set => _rage = Math.Clamp(value, 0, 10);
     }
 
-    // Druga metoda Go - przyjmuje tablicę kierunków
-    public void Go(Direction[] directions)
+    public Orc(string name, int level = 1, int rage = 0) : base(name, level)
     {
-        foreach (var direction in directions)
+        Rage = rage;
+    }
+
+    public Orc()
+    {
+    }
+
+    public override void SayHi()
+    {
+        Console.WriteLine($"I'm {Name}, an Orc at Level {Level} with {Rage} rage.");
+    }
+
+    public void Hunt()
+    {
+        _huntCount++;
+        if (_huntCount % 2 == 0)
         {
-            Go(direction);
+            Rage++;
         }
     }
 
+    public override int Power => (Level * 7) + (Rage * 3);
 }
