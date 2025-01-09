@@ -1,4 +1,4 @@
-using Simulator;
+﻿using Simulator;
 using Xunit;
 
 public class Rectangle

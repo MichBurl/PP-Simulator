@@ -1,4 +1,4 @@
-using Simulator;
+ï»¿using Simulator;
 using Simulator.Maps;
 using Xunit;
 
@@ -49,10 +49,10 @@ public class SmallTorusMap : Map
     {
         return d switch
         {
-            Direction.Up => new Point((p.X + 1) % Size, (p.Y + 1) % Size),           // 45° from Up
-            Direction.Right => new Point((p.X + 1) % Size, (p.Y - 1 + Size) % Size), // 45° from Right
-            Direction.Down => new Point((p.X - 1 + Size) % Size, (p.Y - 1 + Size) % Size), // 45° from Down
-            Direction.Left => new Point((p.X - 1 + Size) % Size, (p.Y + 1) % Size), // 45° from Left
+            Direction.Up => new Point((p.X + 1) % Size, (p.Y + 1) % Size),           // 45Â° from Up
+            Direction.Right => new Point((p.X + 1) % Size, (p.Y - 1 + Size) % Size), // 45Â° from Right
+            Direction.Down => new Point((p.X - 1 + Size) % Size, (p.Y - 1 + Size) % Size), // 45Â° from Down
+            Direction.Left => new Point((p.X - 1 + Size) % Size, (p.Y + 1) % Size), // 45Â° from Left
             _ => p
         };
     }

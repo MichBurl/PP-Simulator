@@ -8,7 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="testsimulator\TestSimulator.csproj" />
+    <Compile Remove="testsimulator\**" />
+    <EmbeddedResource Remove="testsimulator\**" />
+    <None Remove="testsimulator\**" />
   </ItemGroup>
 
 </Project>
