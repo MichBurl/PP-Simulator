@@ -1,0 +1,83 @@
+.map-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+    .map-header button {
+        border: 1px solid #bbb;
+        background: linear-gradient(120deg, #ffffff, #e0e0e0);
+        padding: 0.5rem 1rem;
+        font-size: 1.2rem;
+        cursor: pointer;
+        border-radius: 4px;
+        transition: background 0.3s, transform 0.2s;
+    }
+
+        .map-header button:hover {
+            background: linear-gradient(120deg, #e0e0e0, #c0c0c0);
+            transform: scale(1.05);
+        }
+
+.turn {
+    min-width: 100px; /* Slightly wider for better readability */
+    text-align: center;
+    font-size: 1.1rem;
+    color: #444; /* Darker text color */
+}
+
+.map {
+    display: grid;
+    grid-template-columns: auto repeat(8, 1fr);
+    gap: 2px;
+    background-color: #90EE90;
+    border: 2px solid #666;
+    margin: 1.5rem auto;
+    width: max-content;
+    border-radius: 4px; /* Rounded corners */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+    .map > div {
+        width: 60px;
+        height: 60px;
+        background: #d4f7d4; /* Slightly lighter green */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #666;
+        transition: background 0.3s;
+    }
+
+        .map > div:hover {
+            background: #b0e3b0; /* Highlight on hover */
+        }
+
+    .map > p {
+        width: 20px;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: blue;
+        font-weight: bold; /* Added emphasis */
+    }
+
+    .map > span {
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+.alert {
+    color: darkred;
+    font-weight: bold;
+    text-align: center;
+    padding: 0.5rem;
+    border: 1px solid red;
+    background-color: #ffe5e5; /* Subtle background for alerts */
+    border-radius: 4px;
+}

@@ -1,65 +1,92 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using SimConsole;
 using Simulator;
 using Simulator.Maps;
 
-public class MapVisualizer
-{
-    private readonly Simulation _simulation;
-    private readonly Map _map;
+namespace SimConsole;
 
-    public MapVisualizer(Map map, List<Point> positions, List<Creature> creatures, Simulation simulation)
-    {
-        _simulation = simulation;
-        _map = map;
+public class MapVisualizer {
+    private readonly Map map;
+    private readonly Dictionary<Point, List<IMappable>> positions = new();
+
+    public MapVisualizer(Map map) {
+        this.map = map;
     }
 
-    public void Draw()
-    {
-        Console.Clear();
-        int size = (_map as SmallSquareMap)?.Size ?? 0;
+    public void Clear() {
+        positions.Clear();
+    }
 
-        Console.OutputEncoding = System.Text.Encoding.UTF8;
+    public void AddCreature(IMappable creature, Point position) {
+        if (!positions.ContainsKey(position))
+            positions[position] = new List<IMappable>();
+        positions[position].Add(creature);
+    }
 
-        // Rysowanie górnej krawędzi
-        Console.Write(Box.TopLeft);
-        for (int i = 0; i < size - 1; i++)
-            Console.Write($"{Box.Horizontal}{Box.TopMid}");
-        Console.WriteLine(Box.TopRight);
+    private char GetCellContent(Point point) {
+        if (!positions.ContainsKey(point))
+            return ' ';
 
-        // Rysowanie mapy
-        for (int y = 0; y < size; y++)
-        {
-            for (int x = 0; x < size; x++)
-            {
-                Console.Write(Box.Vertical);
+        var creatures = positions[point];
+        if (creatures.Count > 1)
+            return 'X';
 
-                Point point = new(x, y);
+        return creatures[0].Symbol;
+    }
 
-                // Pobieranie stworów znajdujących się na danym punkcie
-                var creaturesAtPoint = _simulation.Positions
-                    .Select((p, i) => new { Position = p, Creature = _simulation.Creatures[i] })
-                    .Where(pc => pc.Position.X == point.X && pc.Position.Y == point.Y)
-                    .Select(pc => pc.Creature)
-                    .ToList();
+    public void Draw() {
+        Console.WriteLine();
+        DrawTopBorder(map.SizeX);
 
-                // Wybór symbolu w zależności od liczby stworów
-                if (creaturesAtPoint.Count > 1)
-                    Console.Write("X");
-                else if (creaturesAtPoint.Count == 1)
-                    Console.Write(creaturesAtPoint[0] is Orc ? "O" : "E");
-                else
-                    Console.Write(" ");
-            }
-            Console.WriteLine(Box.Vertical);
+        for (var y = map.SizeY - 1; y >= 0; y--) {
+            DrawRow(y, map.SizeX);
+            if (y > 0)
+                DrawMiddleBorder(map.SizeX);
         }
 
-        // Rysowanie dolnej krawędzi
+        DrawBottomBorder(map.SizeX);
+        Console.WriteLine();
+    }
+
+    private void DrawTopBorder(int size) {
+        Console.Write(Box.TopLeft);
+        for (var x = 0; x < size; x++) {
+            Console.Write(Box.Horizontal);
+            if (x < size - 1)
+                Console.Write(Box.TopMid);
+        }
+
+        Console.WriteLine(Box.TopRight);
+    }
+
+    private void DrawBottomBorder(int size) {
         Console.Write(Box.BottomLeft);
-        for (int i = 0; i < size - 1; i++)
-            Console.Write($"{Box.Horizontal}{Box.BottomMid}");
+        for (var x = 0; x < size; x++) {
+            Console.Write(Box.Horizontal);
+            if (x < size - 1)
+                Console.Write(Box.BottomMid);
+        }
+
         Console.WriteLine(Box.BottomRight);
+    }
+
+    private void DrawMiddleBorder(int size) {
+        Console.Write(Box.MidLeft);
+        for (var x = 0; x < size; x++) {
+            Console.Write(Box.Horizontal);
+            if (x < size - 1)
+                Console.Write(Box.Cross);
+        }
+
+        Console.WriteLine(Box.MidRight);
+    }
+
+    private void DrawRow(int y, int size) {
+        Console.Write(Box.Vertical);
+        for (var x = 0; x < size; x++) {
+            Console.Write(GetCellContent(new Point(x, y)));
+            if (x < size - 1)
+                Console.Write(Box.Vertical);
+        }
+
+        Console.WriteLine(Box.Vertical);
     }
 }

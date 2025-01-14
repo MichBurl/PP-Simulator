@@ -1,35 +1,54 @@
-﻿using Simulator;
+using Simulator;
 using Xunit;
 
-public readonly struct Point
-{
-    public readonly int X, Y;
+namespace TestSimulator;
 
-    public Point(int x, int y) => (X, Y) = (x, y);
+public class PointTests {
+    [Theory]
+    [InlineData(1, 2, Direction.Up, 1, 3)]
+    [InlineData(1, 2, Direction.Right, 2, 2)]
+    [InlineData(1, 2, Direction.Down, 1, 1)]
+    [InlineData(1, 2, Direction.Left, 0, 2)]
+    public void Next_ShouldReturnCorrectNextPoint(int x, int y,
+        Direction direction, int expectedX, int expectedY) {
+        // Arrange
+        var point = new Point(x, y);
+        var expected = new Point(expectedX, expectedY);
 
-    public override string ToString() => $"({X}, {Y})";
+        // Act
+        var result = point.Next(direction);
 
-    public Point Next(Direction direction)
-    {
-        return direction switch
-        {
-            Direction.Up => new Point(X, Y + 1),
-            Direction.Right => new Point(X + 1, Y),
-            Direction.Down => new Point(X, Y - 1),
-            Direction.Left => new Point(X - 1, Y),
-            _ => this
-        };
+        // Assert
+        Assert.Equal(expected, result);
     }
 
-    public Point NextDiagonal(Direction direction)
-    {
-        return direction switch
-        {
-            Direction.Up => new Point(X + 1, Y - 1),
-            Direction.Right => new Point(X + 1, Y + 1),
-            Direction.Down => new Point(X - 1, Y + 1),
-            Direction.Left => new Point(X - 1, Y - 1),
-            _ => this
-        };
+    [Theory]
+    [InlineData(1, 2, Direction.Up, 2, 3)]
+    [InlineData(1, 2, Direction.Right, 2, 1)]
+    [InlineData(1, 2, Direction.Down, 0, 1)]
+    [InlineData(1, 2, Direction.Left, 0, 3)]
+    public void NextDiagonal_ShouldReturnCorrectNextPoint(int x, int y,
+        Direction direction, int expectedX, int expectedY) {
+        // Arrange
+        var point = new Point(x, y);
+        var expected = new Point(expectedX, expectedY);
+
+        // Act
+        var result = point.NextDiagonal(direction);
+
+        // Assert
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void ToString_ShouldReturnCorrectFormat() {
+        // Arrange
+        var point = new Point(3, 4);
+
+        // Act
+        var result = point.ToString();
+
+        // Assert
+        Assert.Equal("(3, 4)", result);
     }
 }

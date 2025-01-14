@@ -1,24 +1,28 @@
-﻿using Simulator;
 using Xunit;
+using Simulator;
 
-public static class Validator
-{
-    public static int Limiter(int value, int min, int max)
-    {
-        return Math.Clamp(value, min, max);
+namespace TestSimulator;
+
+public class ValidatorTests {
+    [Theory]
+    [InlineData(5, 0, 10, 5)]
+    [InlineData(-1, 0, 10, 0)]
+    [InlineData(15, 0, 10, 10)]
+    [InlineData(5, 5, 5, 5)]
+    public void Limiter_ShouldReturnCorrectValue(int value, int min, int max, int expected) {
+        var result = Validator.Limiter(value, min, max);
+        Assert.Equal(expected, result);
     }
 
-    public static string Shortener(string value, int min, int max, char placeholder)
-    {
-        value = value.Trim(); // Usuń nadmiarowe spacje
-        if (value.Length < min)
-        {
-            value = value.PadRight(min, placeholder); // Uzupełnij brakujące znaki
-        }
-        else if (value.Length > max)
-        {
-            value = value.Substring(0, max - 1); // Skróć do maksymalnej długości
-        }
-        return value;
+    [Theory]
+    [InlineData("test", 3, 5, '#', "test")]
+    [InlineData("t", 3, 5, '#', "t##")]
+    [InlineData("toolong", 3, 5, '#', "toolo")]
+    [InlineData("   test   ", 3, 5, '#', "test")]
+    [InlineData("a", 3, 5, '*', "a**")]
+    public void Shortener_ShouldReturnCorrectValue(
+        string value, int min, int max, char placeholder, string expected) {
+        var result = Validator.Shortener(value, min, max, placeholder);
+        Assert.Equal(expected, result);
     }
 }

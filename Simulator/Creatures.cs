@@ -1,33 +1,34 @@
-﻿namespace Simulator;
+﻿using Simulator.Maps;
 
-using System;
+namespace Simulator;
 
-public abstract class Creature
+public abstract class Creature : Mappable
 {
-    private string _name = "Unknown";
-    private int _level = 1;
+    private string name = "Unknown";
+    private int level = 1;
 
-    public string Name
+    protected string Name
     {
-        get => _name;
-        set
+        get => name;
+        init
         {
-            if (_name != "Unknown") return;
-            _name = Validator.Shortener(value, 3, 25, '#');
+            if (value == null) return;
+            name = Validator.Shortener(value.Trim(), 3, 25, '#');
+            if (char.IsLower(name[0]))
+                name = char.ToUpper(name[0]) + name.Substring(1);
         }
     }
 
     public int Level
     {
-        get => _level;
-        set
-        {
-            if (_level != 1) return;
-            _level = Validator.Limiter(value, 1, 10);
-        }
+        get => level;
+        init => level = Validator.Limiter(value, 1, 10);
     }
 
-    protected Creature(string name, int level = 1)
+    public abstract string Info { get; }
+    public abstract int Power { get; }
+
+    public Creature(string name = "Unknown", int level = 1)
     {
         Name = name;
         Level = level;
@@ -39,90 +40,18 @@ public abstract class Creature
 
     public abstract void SayHi();
 
-    public abstract int Power { get; }
-
-    public abstract string Info { get; }
+    public void Upgrade()
+    {
+        if (level < 10)
+            level++;
+    }
 
     public override string ToString()
     {
         return $"{GetType().Name.ToUpper()}: {Info}";
     }
-}
 
-public class Elf : Creature
-{
-    private int _agility;
-    private int _singCount;
+    public override char Symbol => GetType().Name[0];
 
-    public int Agility
-    {
-        get => _agility;
-        private set => _agility = Validator.Limiter(value, 0, 10);
-    }
-
-    public Elf(string name, int level = 1, int agility = 0) : base(name, level)
-    {
-        Agility = agility;
-    }
-
-    public Elf()
-    {
-    }
-
-    public override void SayHi()
-    {
-        Console.WriteLine($"I'm {Name}, an Elf at Level {Level} with {Agility} agility.");
-    }
-
-    public void Sing()
-    {
-        _singCount++;
-        if (_singCount % 3 == 0)
-        {
-            Agility++;
-        }
-    }
-
-    public override int Power => (Level * 8) + (Agility * 2);
-
-    public override string Info => $"{Name} [{Level}][{Agility}]";
-}
-
-public class Orc : Creature
-{
-    private int _rage;
-    private int _huntCount;
-
-    public int Rage
-    {
-        get => _rage;
-        private set => _rage = Validator.Limiter(value, 0, 10);
-    }
-
-    public Orc(string name, int level = 1, int rage = 0) : base(name, level)
-    {
-        Rage = rage;
-    }
-
-    public Orc()
-    {
-    }
-
-    public override void SayHi()
-    {
-        Console.WriteLine($"I'm {Name}, an Orc at Level {Level} with {Rage} rage.");
-    }
-
-    public void Hunt()
-    {
-        _huntCount++;
-        if (_huntCount % 2 == 0)
-        {
-            Rage++;
-        }
-    }
-
-    public override int Power => (Level * 7) + (Rage * 3);
-
-    public override string Info => $"{Name} [{Level}][{Rage}]";
+    protected override string GetName() => name;
 }

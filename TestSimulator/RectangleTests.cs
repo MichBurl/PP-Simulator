@@ -1,32 +1,41 @@
-﻿using Simulator;
 using Xunit;
+using Simulator;
 
-public class Rectangle
-{
-    public readonly int X1, Y1, X2, Y2;
+namespace TestSimulator;
 
-    public Rectangle(int x1, int y1, int x2, int y2)
-    {
-        if (x1 == x2 || y1 == y2)
-        {
-            throw new ArgumentException("Rectangle cannot have collinear points (thin rectangle).", nameof(x1));
-        }
-
-        X1 = Math.Min(x1, x2);
-        Y1 = Math.Min(y1, y2);
-        X2 = Math.Max(x1, x2);
-        Y2 = Math.Max(y1, y2);
+public class RectangleTests {
+    [Fact]
+    public void Constructor_ShouldOrderCoordinates() {
+        var rect = new Rectangle(5, 5, 0, 0);
+        Assert.Equal(0, rect.X1);
+        Assert.Equal(0, rect.Y1);
+        Assert.Equal(5, rect.X2);
+        Assert.Equal(5, rect.Y2);
     }
 
-    public Rectangle(Point p1, Point p2) : this(p1.X, p1.Y, p2.X, p2.Y) { }
-
-    public bool Contains(Point point)
-    {
-        return point.X >= X1 && point.X <= X2 && point.Y >= Y1 && point.Y <= Y2;
+    [Theory]
+    [InlineData(0, 0, 0, 5)]
+    [InlineData(0, 0, 5, 0)]
+    public void Constructor_ZeroDimension_ShouldThrowArgumentException(int x1, int y1, int x2, int y2) {
+        Assert.Throws<ArgumentException>(() => new Rectangle(x1, y1, x2, y2));
     }
 
-    public override string ToString()
-    {
-        return $"({X1}, {Y1}):({X2}, {Y2})";
+    [Theory]
+    [InlineData(0, 0, 2, 2, 1, 1, true)]
+    [InlineData(0, 0, 2, 2, 3, 3, false)]
+    [InlineData(0, 0, 2, 2, 0, 0, true)]
+    [InlineData(0, 0, 2, 2, 2, 2, true)]
+    public void Contains_ShouldReturnCorrectResult(
+        int rectX1, int rectY1, int rectX2, int rectY2,
+        int pointX, int pointY, bool expected) {
+        var rect = new Rectangle(rectX1, rectY1, rectX2, rectY2);
+        var point = new Point(pointX, pointY);
+        Assert.Equal(expected, rect.Contains(point));
+    }
+
+    [Fact]
+    public void ToString_ShouldFormatCorrectly() {
+        var rect = new Rectangle(1, 2, 3, 4);
+        Assert.Equal("(1, 2):(3, 4)", rect.ToString());
     }
 }

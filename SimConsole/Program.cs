@@ -1,72 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using SimConsole;
+﻿using System.Text;
 using Simulator;
 using Simulator.Maps;
 
-internal class Program
-{
-    private static void Main(string[] args)
-    {
-        try
-        {
-            Console.OutputEncoding = System.Text.Encoding.UTF8;
+namespace SimConsole;
 
-            // Inicjalizacja mapy, stworów, pozycji i ruchów
-            SmallSquareMap map = new(5);
-            List<Creature> creatures = new()
-            {
-                new Orc("Gorbag"),
-                new Elf("Elandor")
-            };
-            List<Point> points = new()
-            {
-                new Point(2, 2),
-                new Point(3, 1)
-            };
-            string moves = "dlrludl";
+public class Program {
+    private static void DisplayHistoryTurn(SimulationTurnLog turn, MapVisualizer visualizer) {
+        // Clear console properly
+        Console.Clear();
+        
+        // Display turn info
+        Console.WriteLine($"Turn log: {turn.Mappable} goes {turn.Move}");
+        Console.WriteLine();
 
-            Simulation simulation = new(map, creatures, points, moves);
-            MapVisualizer mapVisualizer = new(simulation.Map, simulation.Positions, simulation.Creatures, simulation);
-
-            while (!simulation.Finished)
-            {
-                // Wyczyszczenie konsoli przed rysowaniem mapy
-                Console.Clear();
-
-                // Rysowanie aktualnego stanu mapy
-                mapVisualizer.Draw();
-
-                // Wyświetlenie informacji o obecnym ruchu i stworze
-                Console.WriteLine($"Current Turn: {simulation.CurrentMoveName}");
-                Console.WriteLine($"Current Creature: {simulation.CurrentCreature.Name}");
-                Console.WriteLine($"Creature Position: {simulation.Positions[simulation.Creatures.IndexOf(simulation.CurrentCreature)]}");
-
-                // Próba wykonania ruchu
-                try
-                {
-                    simulation.Turn();
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error during turn: {ex.Message}");
-                    break; // Przerwij symulację w przypadku błędu
-                }
-
-                // Pauza dla wizualizacji
-                Thread.Sleep(500);
+        // Clear and redraw map
+        visualizer.Clear();
+        foreach (var (position, symbols) in turn.Symbols) {
+            if (symbols.Count == 1) {
+                visualizer.AddCreature(new DummyMappable(symbols[0]), position);
             }
+            else if (symbols.Count > 1) {
+                visualizer.AddCreature(new DummyMappable('X'), position);
+            }
+        }
+        visualizer.Draw();
+    }
 
-            // Ostateczne rysowanie mapy i zakończenie symulacji
-            Console.WriteLine("Simulation completed successfully!");
-            mapVisualizer.Draw();
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
+    public static void Main() {
+        Console.OutputEncoding = Encoding.UTF8;
+        Console.CursorVisible = false;
+
+        var map = new SmallTorusMap(8);
+        List<IMappable> creatures = [
+            new Orc("Gorbag"),
+            new Elf("Elandor"),
+            new Animals { Description = "Rabbits", Size = 5 },
+            new Birds("Eagles", 3, true),
+            new Birds("Ostriches", 2, false)
+        ];
+
+        List<Point> points = [
+            new(1, 1),
+            new(2, 2),
+            new(3, 3),
+            new(4, 4),
+            new(5, 5)
+        ];
+
+        var moves = "UDLRUDLRUDLRUDLRUDLR"; // 20 moves
+
+        Simulation simulation = new(map, creatures, points, moves);
+        SimulationHistory history = new(simulation);
+        MapVisualizer visualizer = new(map);
+
+        int[] turnsToShow = [5, 10, 15, 20];
+        
+        foreach (var turn in turnsToShow) {
+            Console.WriteLine($"\nTurn {turn}:");
+            DisplayHistoryTurn(history.GetTurn(turn), visualizer);
+            
+            Console.WriteLine("\nPress any key for next turn...");
+            Console.ReadKey(true);
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"An error occurred: {ex.Message}");
-        }
+
+        Console.WriteLine("\nSimulation history replay completed.");
     }
 }
